@@ -82,7 +82,7 @@
             font-weight: 600;
         }
 
-        /* CONTAINER PRINCIPAL */
+        /* Substitua a regra .main-container por esta */
         .main-container {
             flex: 1;
             display: flex;
@@ -93,12 +93,14 @@
             padding: 30px 40px;
             position: relative;
             z-index: 1;
+            height: 100%; /* Força a altura a respeitar o pai */
+            overflow: hidden; /* Garante que nada vaze */
         }
 
-        /* ÁREA DE CHAT */
+        /* Substitua a regra .chat-area por esta */
         .chat-area {
             flex: 1;
-            overflow-y: auto;
+            overflow-y: auto; /* A barra de rolagem aparece aqui */
             padding: 20px;
             display: flex;
             flex-direction: column;
@@ -106,8 +108,8 @@
             scrollbar-width: thin;
             scrollbar-color: var(--accent-primary) transparent;
             margin-bottom: 20px;
+            min-height: 0; /* O SEGREDO: impede o flexbox de crescer infinitamente */
         }
-
         .chat-area::-webkit-scrollbar {
             width: 6px;
         }

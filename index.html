@@ -421,57 +421,77 @@
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
         const suggestionsDiv = document.getElementById('suggestions');
-        
-        // Configuração para conectar com o n8n no futuro
-        const N8N_WEBHOOK = "https://agente-vidaenegocios.duckdns.org/webhook/pergunta-agente";
 
-        function getCurrentTime() {
-            const now = new Date();
-            return now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        }
+try {
+    const response = await fetch("https://agente-vidaenegocios.duckdns.org/webhook/pergunta-agente", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: userMessage,
+        sessionId: sessionId
+      })
+    });
 
-        function useSuggestion(text) {
-            userInput.value = text;
-            userInput.focus();
-            suggestionsDiv.style.display = 'none';
-        }
+    if (!response.ok) {
+      throw new Error(`Erro na requisição: ${response.status}`);
+    }
 
-        async function handleSend() {
-            const text = userInput.value.trim();
-            if (text === "") return;
+    const data = await response.json();
+    console.log('Dados recebidos do n8n:', data); // Para debug
 
-            // Esconde sugestões após primeira mensagem
-            suggestionsDiv.style.display = 'none';
+    // CORREÇÃO AQUI: Trata se vier como array
+    let responseData = data;
+    if (Array.isArray(data) && data.length > 0) {
+      responseData = data[0];
+    }
 
-            addMessage(text, 'user');
-            userInput.value = '';
-            sendBtn.disabled = true;
+    let paragraphs = [];
 
-            const loadingId = addLoading();
-            scrollToBottom();
+    // Verifica o formato da resposta
+    if (typeof responseData.response === 'string') {
+      paragraphs = responseData.response.split('\n\n').filter(p => p.trim());
+    } else if (Array.isArray(responseData.response)) {
+      paragraphs = responseData.response.filter(p => p.trim());
+    } else if (typeof responseData.output === 'string') {
+      paragraphs = responseData.output.split('\n\n').filter(p => p.trim());
+    } else if (Array.isArray(responseData.output)) {
+      paragraphs = responseData.output.filter(p => p.trim());
+    } else if (typeof responseData.message === 'string') {
+      paragraphs = responseData.message.split('\n\n').filter(p => p.trim());
+    } else {
+      paragraphs = ['Resposta recebida.'];
+    }
 
-            try {
-                const response = await fetch(N8N_WEBHOOK, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ question: text })
-                });
-                
-                const data = await response.json();
-                removeLoading(loadingId);
-                // Ajuste 'data.answer' conforme o JSON que seu n8n retorna (ex: data.output, data.text)
-                addMessage(data.answer || "Resposta recebida.", 'ai');
-                
-            } catch (error) {
-                removeLoading(loadingId);
-                console.error("Erro:", error);
-                addMessage("Desculpe, houve um erro de conexão. Por favor, tente novamente.", 'ai');
-            } finally {
-                sendBtn.disabled = false;
-            }
-            */
-        }
+    // Adiciona um balão vazio do assistente para ir preenchendo os parágrafos
+    setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
+    // ANIMAÇÃO DOS PARÁGRAFOS (sua lógica original mantida)
+    for (let i = 0; i < paragraphs.length; i++) {
+      // Aguarda 1.5s entre parágrafos (menos no primeiro)
+      if (i > 0) await new Promise(resolve => setTimeout(resolve, 1500));
+
+      setMessages(prev => {
+        const lastMessage = prev[prev.length - 1];
+        const updatedContent = lastMessage.content 
+          ? lastMessage.content + '\n\n' + paragraphs[i] 
+          : paragraphs[i];
+        const updatedLastMessage = { ...lastMessage, content: updatedContent };
+        return [...prev.slice(0, -1), updatedLastMessage];
+      });
+    }
+
+  } catch (error) {
+    console.error('Erro ao buscar resposta:', error);
+    setMessages([...newMessages, { 
+      role: 'assistant', 
+      content: 'Desculpe, ocorreu um erro ao processar sua pergunta. Por favor, tente novamente.' 
+    }]);
+  } finally {
+    setLoading(false);
+  }
+};
         function addMessage(text, sender) {
             const row = document.createElement('div');
             row.classList.add('message-row');

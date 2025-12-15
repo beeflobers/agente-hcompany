@@ -75,26 +75,6 @@
             gap: 15px;
         }
 
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 20px;
-            color: #0a0e1a;
-            box-shadow: 0 0 20px var(--glow);
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
-        }
-
         .logo-text {
             font-size: 24px;
             font-weight: 700;
@@ -104,32 +84,6 @@
         .logo-text .company {
             color: var(--accent-primary);
             font-weight: 600;
-        }
-
-        .status-badge {
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid rgba(34, 197, 94, 0.4);
-            color: #4ade80;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            background: #4ade80;
-            border-radius: 50%;
-            animation: blink 2s ease-in-out infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
         }
 
         /* CONTAINER PRINCIPAL */
@@ -193,7 +147,7 @@
             width: 40px;
             height: 40px;
             border-radius: 12px;
-            display: none;
+            display: flex; /* Alterado de none para flex para aparecer os avatares */
             align-items: center;
             justify-content: center;
             font-weight: 600;
@@ -405,10 +359,6 @@
             .logo-text {
                 font-size: 20px;
             }
-
-            .status-badge {
-                display: none;
-            }
         }
     </style>
 </head>
@@ -445,11 +395,11 @@
                 <div class="suggestion-chip" onclick="useSuggestion('Como se iniciou a equiplex?')">
                     Como se iniciou a equiplex?
                    </div>
-                      <div class="suggestion-chip" onclick="useSuggestion('Oque é o Instituto Hebrom?')">
-                    Oque é o Instituto Hebrom?
+                      <div class="suggestion-chip" onclick="useSuggestion('O que é o Instituto Hebrom?')">
+                    O que é o Instituto Hebrom?
                 </div>
-                <div class="suggestion-chip" onclick="useSuggestion('Oque é o Projeto Saphe?')">
-                    Oque é o Projeto Saphe?
+                <div class="suggestion-chip" onclick="useSuggestion('O que é o Projeto Saphe?')">
+                    O que é o Projeto Saphe?
                 </div>
             </div>
             <div class="input-area">
@@ -500,20 +450,23 @@
             const loadingId = addLoading();
             scrollToBottom();
 
-            CÓDIGO REAL PARA N8N (Descomente para usar) 
             try {
-                const response = await fetch("https://agente-vidaenegocios.duckdns.org/webhook/pergunta-agente", {
+                const response = await fetch(N8N_WEBHOOK, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ question: text })
                 });
+                
                 const data = await response.json();
                 removeLoading(loadingId);
+                // Ajuste 'data.answer' conforme o JSON que seu n8n retorna (ex: data.output, data.text)
                 addMessage(data.answer || "Resposta recebida.", 'ai');
-                sendBtn.disabled = false;
+                
             } catch (error) {
                 removeLoading(loadingId);
+                console.error("Erro:", error);
                 addMessage("Desculpe, houve um erro de conexão. Por favor, tente novamente.", 'ai');
+            } finally {
                 sendBtn.disabled = false;
             }
             */

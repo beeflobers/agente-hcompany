@@ -500,23 +500,9 @@
             const loadingId = addLoading();
             scrollToBottom();
 
-            // --- SIMULAÇÃO (Apague isso quando conectar o n8n) ---
-            setTimeout(() => {
-                removeLoading(loadingId);
-                const respostas = [
-                    "Entendi perfeitamente! Estou processando sua solicitação sobre '" + text + "'. Em breve terei acesso ao banco de dados completo da h.company.",
-                    "Ótima pergunta! Deixe-me buscar essas informações para você. Por enquanto estou em modo de demonstração, mas logo estarei totalmente integrado.",
-                    "Recebi sua mensagem! Assim que a integração com o sistema estiver completa, poderei fornecer respostas ainda mais precisas sobre '" + text + "'."
-                ];
-                const resposta = respostas[Math.floor(Math.random() * respostas.length)];
-                addMessage(resposta, 'ai');
-                sendBtn.disabled = false;
-            }, 1500);
-            // -----------------------------------------------------
-
-            /* --- CÓDIGO REAL PARA N8N (Descomente para usar) ---
+            CÓDIGO REAL PARA N8N (Descomente para usar) 
             try {
-                const response = await fetch(N8N_WEBHOOK, {
+                const response = await fetch("https://agente-vidaenegocios.duckdns.org/webhook/pergunta-agente", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ question: text })
